@@ -57,6 +57,7 @@ class ChessGame:
             # squares=highlight_squares,     # colored square highlight
             size=self.WINDOW_SIZE
         )
+        #test
         
         # Convert SVG to Pygame surface and display
         py_image = self.svg_to_pygame_surface(svg)
