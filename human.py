@@ -1,16 +1,23 @@
 import chess
 import pygame
+import config
 
 class HumanPlayer:
     def __init__(self, color, game):
         self.color = color
         self.game = game  # Store reference to game for redrawing
         self.selected_square = None
-        
+
     def get_square_from_coords(self, x, y, flipped=False):
-        """Convert screen coordinates to chess square."""
-        file_idx = x * 8 // 600
-        rank_idx = y * 8 // 600
+        """
+        Convert screen coordinates to chess square.
+        :x: x coordinate
+        :y: y coordinate
+        :flipped: something about flipped board
+        :returns: chess.square or None
+        """
+        file_idx = x * 8 // config.BOARD_SIZE
+        rank_idx = y * 8 // config.BOARD_SIZE
         if flipped:
             file_idx = 7 - file_idx
             rank_idx = 7 - rank_idx
@@ -51,10 +58,10 @@ class HumanPlayer:
         button_height = 80
         button_margin = 10
         total_height = (button_height + button_margin) * len(pieces)
-        start_y = (600 - total_height) // 2  # Center vertically in 600x600 window
+        start_y = (config.BOARD_SIZE - total_height) // 2  # Center vertically in 600x600 window
         
         # Create semi-transparent overlay
-        overlay = pygame.Surface((600, 600))
+        overlay = pygame.Surface((config.BOARD_SIZE, config.BOARD_SIZE))
         overlay.fill((0, 0, 0))
         overlay.set_alpha(128)
         screen.blit(overlay, (0, 0))
@@ -76,7 +83,7 @@ class HumanPlayer:
         for piece_type, piece_name in pieces:
             # Create button rectangle
             button_rect = pygame.Rect(
-                (600 - button_width) // 2,  # Center horizontally
+                (config.BOARD_SIZE - button_width) // 2,  # Center horizontally
                 current_y,
                 button_width,
                 button_height
@@ -120,7 +127,7 @@ class HumanPlayer:
                         return piece_type
         
     def get_move(self, board):
-        """Get move from human player through GUI interaction."""
+        """Get move from human player through GUI interaction, added drag and drop"""
         # Removed pygame.event.clear() to avoid discarding important events
         
         while True:
@@ -160,7 +167,8 @@ class HumanPlayer:
                         self.selected_square = None
                         return move
                     
-                    # If illegal move, clear selection
+                    # If illegal move, clear selection, updated to remove the x over the piece
                     self.selected_square = None
+                    self.game.display_board(last_move=None, selected_square=self.selected_square)
         
         return None

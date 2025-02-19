@@ -7,8 +7,10 @@ import pygame
 import cairosvg
 import io
 from PIL import Image
+import config
 
 IS_BOT = False  # Set to False for human vs bot, True for bot vs bot
+WINDOW_SIZE = 800
 
 class ChessGame:
     def __init__(self):
@@ -24,7 +26,7 @@ class ChessGame:
         
         # Initialize Pygame
         pygame.init()
-        self.WINDOW_SIZE = 600
+        self.WINDOW_SIZE = config.BOARD_SIZE
         self.screen = pygame.display.set_mode((self.WINDOW_SIZE, self.WINDOW_SIZE))
         pygame.display.set_caption("Chess Game")
         
@@ -41,17 +43,18 @@ class ChessGame:
     def display_board(self, last_move=None, selected_square=None):
         """Display the current board state"""
         # Build highlight dictionary for the selected square
-        highlight_squares = None
+        highlight_squares = {}
+
         if selected_square is not None:
-            highlight_squares = {
-                selected_square: {"fill": "#FFFF00", "stroke": "none"}
-            }
+            highlight_squares = {move.to_square: "#aaa23b80" for move in self.board.get_board_state().legal_moves if
+                                 move.from_square == selected_square}
 
         # Create SVG with highlighted last move and selected square
         svg = chess.svg.board(
             board=self.board.get_board_state(),
             lastmove=last_move,
-            squares=highlight_squares,     # colored square highlight
+            fill=highlight_squares,
+            # squares=highlight_squares,     # colored square highlight
             size=self.WINDOW_SIZE
         )
         
