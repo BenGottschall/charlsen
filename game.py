@@ -10,7 +10,6 @@ from PIL import Image
 import config
 
 IS_BOT = False  # Set to False for human vs bot, True for bot vs bot
-WINDOW_SIZE = 800
 
 class ChessGame:
     def __init__(self):
@@ -30,7 +29,7 @@ class ChessGame:
         self.screen = pygame.display.set_mode((self.WINDOW_SIZE, self.WINDOW_SIZE))
         pygame.display.set_caption("Chess Game")
 
-    def draw_baord(self, screen):
+    def draw_board(self, screen):
         square_size = self.WINDOW_SIZE // 8
         for rank in range(8):
             for file in range(8):
