@@ -58,6 +58,7 @@ class ChessGame:
             board=self.board.get_board_state(),
             lastmove=last_move,
             fill=highlight_squares,
+            colors={"square dark": "#7e945e", "square light": "#eaecd3"},
             # squares=highlight_squares,     # colored square highlight
             size=self.WINDOW_SIZE
         )
