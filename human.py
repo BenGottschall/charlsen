@@ -7,6 +7,7 @@ class HumanPlayer:
         self.color = color
         self.game = game  # Store reference to game for redrawing
         self.selected_square = None
+        self.dragging = False
 
     def get_square_from_coords(self, x, y, flipped=False):
         """
@@ -129,46 +130,44 @@ class HumanPlayer:
     def get_move(self, board):
         """Get move from human player through GUI interaction, added drag and drop"""
         # Removed pygame.event.clear() to avoid discarding important events
-        
+        dragged_piece = None
+        start_square = None
+
         while True:
-            event = pygame.event.wait()
-            
-            if event.type == pygame.QUIT:
-                return None
-                
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos
-                square = self.get_square_from_coords(x, y, self.color == chess.BLACK)
-                
-                if self.selected_square is None:
-                    # First click - select piece
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return None
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = event.pos
+                    square = self.get_square_from_coords(x, y, self.color == chess.BLACK)
                     piece = board.get_board_state().piece_at(square)
+
                     if piece and piece.color == self.color:
-                        self.selected_square = square
-                        # Immediately redraw board with highlighted square
-                        self.game.display_board(last_move=None, selected_square=self.selected_square)
-                else:
-                    # Second click - try to make move
-                    from_square = self.selected_square
-                    to_square = square
-                    
-                    # Check if this is a promotion move
-                    if self.is_promotion_move(board, from_square, to_square):
-                        promotion_piece = self.get_promotion_choice()
-                        if promotion_piece is None:
+                        self.dragging = True
+                        start_square = square
+                        self.selected_square = square  # Highlight selection
+
+
+                elif event.type == pygame.MOUSEBUTTONUP:
+
+                    self.dragging = False
+
+                    x, y = event.pos
+                    end_square = self.get_square_from_coords(x, y, self.color == chess.BLACK)
+
+                    if end_square != start_square:
+                        move = chess.Move(start_square, end_square)
+
+                        if move in board.get_legal_moves():
                             self.selected_square = None
-                            continue
-                        move = chess.Move(from_square, to_square, promotion=promotion_piece)
-                    else:
-                        move = chess.Move(from_square, to_square)
-                    
-                    # Check if move is legal
-                    if move in board.get_legal_moves():
+                            return move  # Execute move
+
+                        # If move is invalid, reset
                         self.selected_square = None
-                        return move
-                    
-                    # If illegal move, clear selection, updated to remove the x over the piece
-                    self.selected_square = None
-                    self.game.display_board(last_move=None, selected_square=self.selected_square)
-        
-        return None
+
+
+
+
+                self.game.display_board(mouse_pos=pygame.mouse.get_pos(), dragging=self.dragging,
+                                        selected_square=self.selected_square)

@@ -1,10 +1,11 @@
 import chess
 import chess.svg
-from board import ChessBoard
+from chess_board import ChessBoard
 from bot import ChessBot
 from human import HumanPlayer
+from board_renderer import BoardRenderer
 import pygame
-import cairosvg
+# import cairosvg
 import io
 from PIL import Image
 import config
@@ -27,47 +28,37 @@ class ChessGame:
         pygame.init()
         self.WINDOW_SIZE = config.BOARD_SIZE
         self.screen = pygame.display.set_mode((self.WINDOW_SIZE, self.WINDOW_SIZE))
+        self.spritesheet = pygame.image.load("spritesheet.png")
+        self.board_renderer = BoardRenderer(self.board.board, self.spritesheet, self.WINDOW_SIZE)
+        # self.board_surf = self.board_renderer.create_board_surface()
         pygame.display.set_caption("Chess Game")
 
-    def draw_board(self, screen):
-        square_size = self.WINDOW_SIZE // 8
-        for rank in range(8):
-            for file in range(8):
-                square = chess.square(file, 7 - rank)
-                color = (240, 217, 181) if (rank + file) % 2 == 0 else (181, 136, 99)
-                pygame.draw.rect(screen, color, (file * square_size, rank * square_size, square_size, square_size))
-
-                piece = self.board.board.piece_at(square)
-                if piece:
-                    piece_str = f"{'w' if piece.color == chess.WHITE else 'b'}{piece.symbol().upper()}"
-                    piece_img = pygame.transform.scale(piece_images[piece_str], (square_size, square_size))
-                    screen.blit(piece_img, (file * square_size, rank * square_size))
-        
-
-    def display_board(self, last_move=None, selected_square=None):
+    def display_board(self, last_move=None, dragging=False,
+                      mouse_pos=None, selected_square=None):
         """Display the current board state"""
         # Build highlight dictionary for the selected square
         highlight_squares = {}
+        selected_piece = None
 
         if selected_square is not None:
             highlight_squares = {move.to_square: "#aaa23b80" for move in self.board.get_board_state().legal_moves if
                                  move.from_square == selected_square}
+            selected_piece = self.board.get_board_state().piece_at(selected_square)
+            piece_color = "w" if selected_piece.color else "b"
+            selected_piece = f"{piece_color}{selected_piece.symbol().lower()}"
 
-        # Create SVG with highlighted last move and selected square
-        svg = chess.svg.board(
-            board=self.board.get_board_state(),
-            lastmove=last_move,
-            fill=highlight_squares,
-            colors={"square dark": "#7e945e", "square light": "#eaecd3"},
-            # squares=highlight_squares,     # colored square highlight
-            size=self.WINDOW_SIZE
-        )
-        #test
+        self.board_renderer.draw_board(self.screen)
+        self.board_renderer.draw_pieces(self.screen, selected_square)
 
-        # Convert SVG to Pygame surface and display
-        py_image = self.svg_to_pygame_surface(svg)
-        self.screen.blit(py_image, (0, 0))
+        if dragging:
+            self.board_renderer.draw_drag(self.screen, mouse_pos, selected_piece)
+
         pygame.display.flip()
+
+    # def draw_drag(self, mouse_pos):
+    #     # self.board_renderer.draw_board(self.screen)
+    #     self.board_renderer.draw_drag(self.screen, mouse_pos)
+    #     pygame.display.flip()
 
     def play_game(self):
         """Main game loop"""
@@ -77,9 +68,11 @@ class ChessGame:
             # Get current player for selected square highlighting
             current_player = self.white_player if self.board.get_board_state().turn else self.black_player
             selected_square = getattr(current_player, 'selected_square', None)
+            dragging = getattr(current_player, 'dragging', False)
+            print(f"Current player: {current_player}\ndragging: {dragging}")
 
             # Display current board with highlights
-            self.display_board(last_move, selected_square)
+            self.display_board(last_move, dragging, selected_square)
 
             # Determine current player
             current_player = self.white_player if self.board.get_board_state().turn else self.black_player
@@ -101,7 +94,7 @@ class ChessGame:
 
             # Add delay only for bot moves
             if isinstance(current_player, ChessBot):
-                pygame.time.wait(1000)  # 1 second delay
+                pygame.time.wait(100)  # 1 second delay
 
         # Display final position
         self.display_board(last_move)

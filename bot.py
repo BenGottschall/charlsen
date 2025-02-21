@@ -1,7 +1,5 @@
 import chess
-from board import ChessBoard
-
-
+from chess_board import ChessBoard
 
 class ChessBot:
     def __init__(self):
@@ -32,7 +30,7 @@ class ChessBot:
 
         return score
 
-    def minimax(self, board: chess.Board, depth, maximizing_player) -> (int, chess.Move):
+    def minimax(self, board: chess.Board, depth, alpha, beta, maximizing_player) -> (int, chess.Move):
         """
         Minimax implementation.
         Returns (best_score, best_move)
@@ -47,29 +45,34 @@ class ChessBot:
             max_eval = float('-inf')
             for move in board.legal_moves:
                 board.push(move)
-                eval, _ = self.minimax(board, depth - 1, False)
+                eval, _ = self.minimax(board, depth - 1, alpha, beta, False)
                 board.pop()
 
                 if eval > max_eval:
                     max_eval = eval
                     best_move = move
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
             return max_eval, best_move
         else:
             min_eval = float('inf')
             for move in board.legal_moves:
                 board.push(move)
-                eval, _ = self.minimax(board, depth - 1, True)
+                eval, _ = self.minimax(board, depth - 1, alpha, beta, True)
                 board.pop()
                 if eval < min_eval:
                     min_eval = eval
                     best_move = move
+                if beta <= alpha:
+                    break
             return min_eval, best_move
 
     def get_move(self, board: ChessBoard) -> chess.Move:
         """
         Main method to select the best move.
         """
-        evaluation, best_move = self.minimax(board.board, depth=3, maximizing_player=board.get_board_state().turn)
+        evaluation, best_move = self.minimax(board.board, depth=3, alpha=float('-inf'), beta=float('inf'), maximizing_player=board.get_board_state().turn)
         print(f"Player: {board.get_board_state().turn}")
         print(f"Best move: {best_move}, Evaluation: {evaluation}")
         return best_move
