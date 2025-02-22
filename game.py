@@ -26,9 +26,10 @@ class ChessGame:
         
         # Initialize Pygame
         pygame.init()
+        pygame.mixer.init()
         self.WINDOW_SIZE = config.BOARD_SIZE
         self.screen = pygame.display.set_mode((self.WINDOW_SIZE, self.WINDOW_SIZE))
-        self.spritesheet = pygame.image.load("spritesheet.png")
+        self.spritesheet = pygame.image.load("assets/spritesheet.png")
         self.board_renderer = BoardRenderer(self.board.board, self.spritesheet, self.WINDOW_SIZE)
         # self.board_surf = self.board_renderer.create_board_surface()
         pygame.display.set_caption("Chess Game")
@@ -47,22 +48,22 @@ class ChessGame:
             piece_color = "w" if selected_piece.color else "b"
             selected_piece = f"{piece_color}{selected_piece.symbol().lower()}"
 
+        if last_move is not None:
+            highlight_squares[last_move.from_square] = "#fd705f80"
+            highlight_squares[last_move.to_square] = "#fd705f80"
+
         self.board_renderer.draw_board(self.screen)
-        self.board_renderer.draw_pieces(self.screen, selected_square)
+        self.board_renderer.draw_pieces(self.screen, selected_square, fill=highlight_squares)
 
         if dragging:
             self.board_renderer.draw_drag(self.screen, mouse_pos, selected_piece)
 
         pygame.display.flip()
 
-    # def draw_drag(self, mouse_pos):
-    #     # self.board_renderer.draw_board(self.screen)
-    #     self.board_renderer.draw_drag(self.screen, mouse_pos)
-    #     pygame.display.flip()
-
     def play_game(self):
         """Main game loop"""
         last_move = None
+        move_sound = pygame.mixer.Sound("assets/move-self.mp3")
 
         while not self.board.is_game_over():
             # Get current player for selected square highlighting
@@ -89,6 +90,7 @@ class ChessGame:
                 print(f"Illegal move attempted: {move}")
                 break
 
+            move_sound.play()
             print(f"Move played: {move}")
             last_move = move
 

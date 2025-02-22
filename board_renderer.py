@@ -27,16 +27,9 @@ class BoardRenderer:
         print(pieces)
         return pieces
 
-    # def create_board_surface(self):
-    #     board_surf = pygame.Surface((self.square_size * 8, self.square_size * 8))
-    #     for row in range(8):
-    #         for col in range(8):
-    #             color = self.colors["square dark"] if (row + col) % 2 else self.colors["square light"]
-    #             pygame.draw.rect(board_surf, color, pygame.Rect(col * self.square_size, row * self.square_size, self.square_size, self.square_size))
-    #     return board_surf
-
     def draw_board(self, screen):
         """Draws the chess board on the screen."""
+        # square 0,0 is bottom left
         board_surf = pygame.Surface((self.square_size * 8, self.square_size * 8))
         for row in range(8):
             for col in range(8):
@@ -44,10 +37,16 @@ class BoardRenderer:
                 pygame.draw.rect(board_surf, color,
                                  pygame.Rect(col * self.square_size, row * self.square_size, self.square_size,
                                              self.square_size))
+
         screen.blit(board_surf, (0,0))
 
-    def draw_pieces(self, screen, selected_square=None):
-        """Places pieces on the board based on FEN"""
+    def draw_pieces(self, screen, selected_square=None, fill=None):
+        """Places pieces on the board based on current board state"""
+        if fill is not None:
+            for square, color in fill.items():
+                self.highlight_square(screen, color, 7-(square//8), (square%8))
+
+
         for square, piece in self.board.piece_map().items():
             col = chess.square_file(square)
             row = 7 - chess.square_rank(square)
@@ -56,6 +55,7 @@ class BoardRenderer:
             if square == selected_square:
                 self.highlight_square(screen, "#38d3f450", row, col)
             screen.blit(piece_image, (col * self.square_size, row * self.square_size))
+
 
     def draw_drag(self, screen, mouse_pos, piece: str):
         """Draws the chess drag on the screen."""
@@ -66,6 +66,9 @@ class BoardRenderer:
         overlay = pygame.Surface((self.square_size, self.square_size), pygame.SRCALPHA)
         overlay.fill(color)
         screen.blit(overlay, (col * self.square_size, row * self.square_size))
+
+
+
 
 if __name__ == "__main__":
     pygame.init()
