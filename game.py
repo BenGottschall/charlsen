@@ -75,6 +75,7 @@ class ChessGame:
     def play_game(self):
         """Main game loop"""
         last_move = None
+        self.black_player.start_game_log()
 
         while not self.board.is_game_over():
             # Get current player for selected square highlighting
