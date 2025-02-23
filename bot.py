@@ -109,60 +109,22 @@ class ChessBot:
 
             return best_eval, best_move
 
-    def negamax(self, board: chess.Board, depth, alpha, beta) -> (int, chess.Move):
-        """
-        Negamax implementation.
-        Returns the best evaluation
-        """
-
-        if depth == 0 or board.is_game_over():
-            return self.evaluate_position(board), None
-
-        best_move = None
-        best_eval = float('-inf')
-
-        # Gather moves and sort them
-        moves = list(board.legal_moves)
-        moves.sort(key=lambda m: self.score_move(board, m), reverse=True)
-
-        for move in moves:
-            board.push(move)
-            score, _ = self.negamax(board, depth - 1, -beta, -alpha)
-            score = -score
-            board.pop()
-
-            if score > best_eval:
-                best_eval = score
-                best_move = move
-
-                if score > alpha:
-                    alpha = score
-
-            if score >= beta:
-                return best_eval, best_move
-
-        return best_eval, best_move
-
-
-
-
     def get_move(self, board: ChessBoard) -> chess.Move:
         """
         Main method to select the best move.
         """
         state = board.get_board_state()
 
-        eval_n, move_n = self.negamax(state, depth=4, alpha=float("inf"), beta=-float("inf"))
 
         eval_m, move_m = self.minimax(state, depth=4, alpha=-float('inf'), beta=float('inf'), maximizing_player=board.get_board_state().turn)
 
 
 
         # Each time you pick a move for logging:
-        self.log_move(move_m, eval_m, move_n, eval_n)
+        self.log_move(move_m, eval_m)
 
         print(f"Player: {state.turn}")
-        print(f"Best move: {move_n}, Evaluation: {eval_n}")
+        print(f"Best move: {move_m}, Evaluation: {eval_m}")
         return move_m
 
 
