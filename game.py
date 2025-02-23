@@ -13,26 +13,30 @@ import config
 IS_BOT = False  # Set to False for human vs bot, True for bot vs bot
 
 class ChessGame:
-    def __init__(self):
-        self.board = ChessBoard()
+    def __init__(self, fen = None):
+        self.board = ChessBoard() if not fen else ChessBoard(fen)
+        self.WINDOW_SIZE = config.BOARD_SIZE
+        self.spritesheet = pygame.image.load("assets/spritesheet.png")
+        self.board_renderer = BoardRenderer(self.board.board, self.spritesheet, self.WINDOW_SIZE)
+
         
         # Initialize players based on IS_BOT flag
         if IS_BOT:
             self.white_player = ChessBot()
             self.black_player = ChessBot()
         else:
-            self.white_player = HumanPlayer(chess.WHITE, self)
+            self.white_player = HumanPlayer(chess.WHITE, self, self.board_renderer)
             self.black_player = ChessBot()
         
         # Initialize Pygame
         pygame.init()
         pygame.mixer.init()
-        self.WINDOW_SIZE = config.BOARD_SIZE
+        self.move_sound = pygame.mixer.Sound("assets/move-self.mp3")
+        self.capture_sound = pygame.mixer.Sound("assets/capture.mp3")
         self.screen = pygame.display.set_mode((self.WINDOW_SIZE, self.WINDOW_SIZE))
-        self.spritesheet = pygame.image.load("assets/spritesheet.png")
-        self.board_renderer = BoardRenderer(self.board.board, self.spritesheet, self.WINDOW_SIZE)
-        # self.board_surf = self.board_renderer.create_board_surface()
         pygame.display.set_caption("Chess Game")
+        # self.board_surf = self.board_renderer.create_board_surface()
+
 
     def display_board(self, last_move=None, dragging=False,
                       mouse_pos=None, selected_square=None):
@@ -60,10 +64,17 @@ class ChessGame:
 
         pygame.display.flip()
 
+    def play_move_sound(self, move):
+        """plays move sound"""
+        if self.board.board.is_capture(move):
+            print("capture move")
+            self.capture_sound.play()
+        else:
+            self.move_sound.play()
+
     def play_game(self):
         """Main game loop"""
         last_move = None
-        move_sound = pygame.mixer.Sound("assets/move-self.mp3")
 
         while not self.board.is_game_over():
             # Get current player for selected square highlighting
@@ -85,12 +96,13 @@ class ChessGame:
                 print("Game ended by player")
                 break
 
+            self.play_move_sound(move)
             # Make the move
             if not self.board.make_move(move):
                 print(f"Illegal move attempted: {move}")
                 break
 
-            move_sound.play()
+
             print(f"Move played: {move}")
             last_move = move
 
@@ -111,16 +123,8 @@ class ChessGame:
 
         pygame.quit()
 
-    def svg_to_pygame_surface(self, svg_string):
-        """Convert SVG string to Pygame surface"""
-        png_data = cairosvg.svg2png(bytestring=svg_string.encode('utf-8'))
-        image = Image.open(io.BytesIO(png_data))
-        image = image.resize((self.WINDOW_SIZE, self.WINDOW_SIZE))
-        mode = image.mode
-        size = image.size
-        data = image.tobytes()
-        return pygame.image.fromstring(data, size, mode)
 
 if __name__ == "__main__":
+    fen = "5k2/8/1PKQ4/8/8/8/8/8 w - - 0 1"
     game = ChessGame()
     game.play_game()

@@ -30,49 +30,48 @@ class ChessBot:
 
         return score
 
-    def minimax(self, board: chess.Board, depth, alpha, beta, maximizing_player) -> (int, chess.Move):
+    def negamax(self, board: chess.Board, depth, alpha, beta) -> int:
         """
-        Minimax implementation.
-        Returns (best_score, best_move)
+        Negamax implementation.
+        Returns the best evaluation
         """
 
         if depth == 0 or board.is_game_over():
-            return self.evaluate_position(board), None
+            return self.evaluate_position(board)
 
-        best_move = None
+        legal_moves = board.legal_moves
 
-        if maximizing_player:
-            max_eval = float('-inf')
-            for move in board.legal_moves:
-                board.push(move)
-                eval, _ = self.minimax(board, depth - 1, alpha, beta, False)
-                board.pop()
+        for move in legal_moves:
+            board.push(move)
+            evaluation = -self.negamax(board, depth - 1, -beta, -alpha)
+            board.pop()
 
-                if eval > max_eval:
-                    max_eval = eval
-                    best_move = move
-                alpha = max(alpha, eval)
-                if beta <= alpha:
-                    break
-            return max_eval, best_move
-        else:
-            min_eval = float('inf')
-            for move in board.legal_moves:
-                board.push(move)
-                eval, _ = self.minimax(board, depth - 1, alpha, beta, True)
-                board.pop()
-                if eval < min_eval:
-                    min_eval = eval
-                    best_move = move
-                if beta <= alpha:
-                    break
-            return min_eval, best_move
+            if evaluation >= beta:
+                return beta
+
+            alpha = max(alpha, evaluation)
+
+        return alpha
+
 
     def get_move(self, board: ChessBoard) -> chess.Move:
         """
         Main method to select the best move.
         """
-        evaluation, best_move = self.minimax(board.board, depth=3, alpha=float('-inf'), beta=float('inf'), maximizing_player=board.get_board_state().turn)
-        print(f"Player: {board.get_board_state().turn}")
-        print(f"Best move: {best_move}, Evaluation: {evaluation}")
+        state = board.get_board_state()
+        best_score = -float("inf")
+        best_move = None
+
+        for move in state.legal_moves:
+            state.push(move)
+            score = self.negamax(state, depth=3, alpha=-float("inf"), beta=float("inf"))
+            score = -score  # Because of negamax symmetry
+            state.pop()
+
+            if score > best_score:
+                best_score = score
+                best_move = move
+
+        print(f"Player: {state.turn}")
+        print(f"Best move: {best_move}, Evaluation: {best_score}")
         return best_move
