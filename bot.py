@@ -65,7 +65,7 @@ class ChessBot:
 
         for move in state.legal_moves:
             state.push(move)
-            score = self.negamax(state, depth=4, alpha=-float("inf"), beta=float("inf"))
+            score = self.negamax(state, depth=3, alpha=-float("inf"), beta=float("inf"))
             score = -score  # Because of negamax symmetry
             state.pop()
 
