@@ -134,8 +134,7 @@ class ChessBot:
         with open(filename, "w") as log_file:
             log_file.write("Starting a new game...\n\n")
 
-    def log_move(self, minimax_move, eval_m, negamax_move, eval_n, filename="minimax_vs_negamax.log"):
+    def log_move(self, minimax_move, eval_m, filename="minimax_vs_negamax.log"):
         # "a" mode appends new lines without removing what's already there
         with open(filename, "a") as log_file:
-            log_file.write(f"Minimax move: {minimax_move}, eval: {eval_m}\n")
-            log_file.write(f"Negamax move: {negamax_move}, eval: {eval_n}\n\n")
+            log_file.write(f"Minimax move: {minimax_move}, eval: {eval_m}\n\n")

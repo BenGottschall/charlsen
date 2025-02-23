@@ -1,38 +1,10 @@
 Starting a new game...
 
 Minimax move: g8h6, eval: 100
-Negamax move: g8h6, eval: 0
 
 Minimax move: h8g8, eval: 100
-Negamax move: h8g8, eval: 100
-
-Minimax move: e7e6, eval: 0
-Negamax move: g8h8, eval: 0
 
 Minimax move: g8h8, eval: 100
-Negamax move: g8h8, eval: 100
 
 Minimax move: h8g8, eval: 100
-Negamax move: d8g5, eval: 900
-
-Minimax move: g8h8, eval: 100
-Negamax move: d8g5, eval: 900
-
-Minimax move: e6d5, eval: 0
-Negamax move: d8g5, eval: 800
-
-Minimax move: f8d6, eval: 100
-Negamax move: d8g5, eval: 900
-
-Minimax move: d6f4, eval: 0
-Negamax move: d6f4, eval: 600
-
-Minimax move: e8f8, eval: 100
-Negamax move: d8g5, eval: 900
-
-Minimax move: d8e8, eval: 100
-Negamax move: d8g5, eval: 800
-
-Minimax move: f7f6, eval: 100
-Negamax move: c7d6, eval: 0
 
