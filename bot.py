@@ -31,7 +31,7 @@ class ChessBot:
 
         return score
 
-    def evaluate_position(self, board: chess.Board) -> int:
+    def evaluate_position(self, board: chess.Board, depth_searched: int) -> int:
         """
         Evaluates the current position of the board.
         Positive values favor white, negative values favor black.
@@ -42,7 +42,7 @@ class ChessBot:
         if board.is_game_over():
             if board.is_checkmate():
 
-                return -10000 if board.turn else 10000
+                return (-10000+depth_searched) if board.turn else (10000-depth_searched)
             return 0 # Draw
 
         score = 0
@@ -57,14 +57,14 @@ class ChessBot:
 
         return score
 
-    def minimax(self, board: chess.Board, depth, alpha, beta, maximizing_player) -> (int, chess.Move):
+    def minimax(self, board: chess.Board, depth, alpha, beta, maximizing_player, ply=0) -> (int, chess.Move):
         """
         Minimax implementation.
         Returns (best_score, best_move)
         """
 
         if depth == 0 or board.is_game_over():
-            return self.evaluate_position(board), None
+            return self.evaluate_position(board, ply), None
 
         best_move = None
 
@@ -76,7 +76,7 @@ class ChessBot:
             best_eval = float('-inf')
             for move in moves:
                 board.push(move)
-                score, _ = self.minimax(board, depth - 1, alpha, beta, False)
+                score, _ = self.minimax(board, depth - 1, alpha, beta, False, ply+1)
                 board.pop()
 
                 if score > best_eval:
@@ -94,7 +94,7 @@ class ChessBot:
             best_eval = float('inf')
             for move in moves:
                 board.push(move)
-                score, _ = self.minimax(board, depth - 1, alpha, beta, True)
+                score, _ = self.minimax(board, depth - 1, alpha, beta, True, ply+1)
                 board.pop()
 
                 if score < best_eval:
@@ -116,7 +116,7 @@ class ChessBot:
         state = board.get_board_state()
 
 
-        eval_m, move_m = self.minimax(state, depth=4, alpha=-float('inf'), beta=float('inf'), maximizing_player=board.get_board_state().turn)
+        eval_m, move_m = self.minimax(state, depth=5, alpha=-float('inf'), beta=float('inf'), maximizing_player=board.get_board_state().turn)
 
 
 
