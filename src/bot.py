@@ -129,12 +129,12 @@ class ChessBot:
 
 
 
-    def start_game_log(self, filename="minimax_vs_negamax.log"):
+    def start_game_log(self, filename="../logs/minimax_vs_negamax.log"):
         # "w" mode overwrites the file or creates it if it doesn't exist
         with open(filename, "w") as log_file:
             log_file.write("Starting a new game...\n\n")
 
-    def log_move(self, minimax_move, eval_m, filename="minimax_vs_negamax.log"):
+    def log_move(self, minimax_move, eval_m, filename="../logs/minimax_vs_negamax.log"):
         # "a" mode appends new lines without removing what's already there
         with open(filename, "a") as log_file:
             log_file.write(f"Minimax move: {minimax_move}, eval: {eval_m}\n\n")

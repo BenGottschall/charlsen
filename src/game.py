@@ -6,8 +6,6 @@ from human import HumanPlayer
 from board_renderer import BoardRenderer
 import pygame
 # import cairosvg
-import io
-from PIL import Image
 import config
 
 IS_BOT = False  # Set to False for human vs bot, True for bot vs bot
@@ -16,7 +14,7 @@ class ChessGame:
     def __init__(self, fen = None):
         self.board = ChessBoard() if not fen else ChessBoard(fen)
         self.WINDOW_SIZE = config.BOARD_SIZE
-        self.spritesheet = pygame.image.load("assets/spritesheet.png")
+        self.spritesheet = pygame.image.load("../assets/spritesheet.png")
         self.board_renderer = BoardRenderer(self.board.board, self.spritesheet, self.WINDOW_SIZE)
 
         
@@ -31,8 +29,8 @@ class ChessGame:
         # Initialize Pygame
         pygame.init()
         pygame.mixer.init()
-        self.move_sound = pygame.mixer.Sound("assets/move-self.mp3")
-        self.capture_sound = pygame.mixer.Sound("assets/capture.mp3")
+        self.move_sound = pygame.mixer.Sound("../assets/move-self.mp3")
+        self.capture_sound = pygame.mixer.Sound("../assets/capture.mp3")
         self.screen = pygame.display.set_mode((self.WINDOW_SIZE, self.WINDOW_SIZE))
         pygame.display.set_caption("Chess Game")
         # self.board_surf = self.board_renderer.create_board_surface()
