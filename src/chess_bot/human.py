@@ -1,6 +1,7 @@
 import chess
 import pygame
-import config
+from src import config
+
 
 class HumanPlayer:
     def __init__(self, color, game, board_renderer):

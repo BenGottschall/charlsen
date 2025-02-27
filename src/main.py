@@ -1,14 +1,14 @@
 import chess
 import chess.svg
-from chess_board import ChessBoard
-from bot import ChessBot
-from human import HumanPlayer
-from board_renderer import BoardRenderer
+from chess_bot import ChessBoard
+from chess_bot import ChessBot
+from chess_bot import HumanPlayer
+from ui import BoardRenderer
 import pygame
 import os
 import config
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 LOGS_DIR = os.path.join(BASE_DIR, "logs")
 

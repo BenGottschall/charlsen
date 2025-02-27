@@ -69,7 +69,7 @@ class BoardRenderer:
 
 
 
-
+# For testing (not working right now):
 if __name__ == "__main__":
     pygame.init()
     screen = pygame.display.set_mode((800, 800))

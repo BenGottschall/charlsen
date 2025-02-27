@@ -1,5 +1,5 @@
 import chess
-from chess_board import ChessBoard
+from .chess_board import ChessBoard
 
 class ChessBot:
     def __init__(self):
