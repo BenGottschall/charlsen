@@ -2,7 +2,7 @@ import chess
 import chess.svg
 from chess_bot import ChessBoard
 from chess_bot import ChessBot
-from chess_bot import HumanPlayer
+from chess_bot.human import HumanPlayer
 from ui import BoardRenderer
 import pygame
 import os
