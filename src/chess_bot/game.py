@@ -5,8 +5,12 @@ from bot import ChessBot
 from human import HumanPlayer
 from board_renderer import BoardRenderer
 import pygame
-# import cairosvg
+import os
 import config
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+ASSETS_DIR = os.path.join(BASE_DIR, "assets")
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
 
 IS_BOT = False  # Set to False for human vs bot, True for bot vs bot
 
@@ -14,7 +18,7 @@ class ChessGame:
     def __init__(self, fen = None):
         self.board = ChessBoard() if not fen else ChessBoard(fen)
         self.WINDOW_SIZE = config.BOARD_SIZE
-        self.spritesheet = pygame.image.load("../assets/spritesheet.png")
+        self.spritesheet = pygame.image.load(f"{ASSETS_DIR}/spritesheet.png")
         self.board_renderer = BoardRenderer(self.board.board, self.spritesheet, self.WINDOW_SIZE)
 
         
@@ -29,8 +33,8 @@ class ChessGame:
         # Initialize Pygame
         pygame.init()
         pygame.mixer.init()
-        self.move_sound = pygame.mixer.Sound("../assets/move-self.mp3")
-        self.capture_sound = pygame.mixer.Sound("../assets/capture.mp3")
+        self.move_sound = pygame.mixer.Sound(f"{ASSETS_DIR}/move-self.mp3")
+        self.capture_sound = pygame.mixer.Sound(f"{ASSETS_DIR}/capture.mp3")
         self.screen = pygame.display.set_mode((self.WINDOW_SIZE, self.WINDOW_SIZE))
         pygame.display.set_caption("Chess Game")
         # self.board_surf = self.board_renderer.create_board_surface()
@@ -73,7 +77,7 @@ class ChessGame:
     def play_game(self):
         """Main game loop"""
         last_move = None
-        self.black_player.start_game_log()
+        self.black_player.start_game_log(f"{LOGS_DIR}/minimax.log")
 
         while not self.board.is_game_over():
             # Get current player for selected square highlighting
@@ -107,7 +111,7 @@ class ChessGame:
 
             # Add delay only for bot moves
             if isinstance(current_player, ChessBot):
-                pygame.time.wait(100)  # 1 second delay
+                pygame.time.wait(100)  # .1 second delay
 
         # Display final position
         self.display_board(last_move)

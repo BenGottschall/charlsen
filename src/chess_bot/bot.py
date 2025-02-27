@@ -3,7 +3,7 @@ from chess_board import ChessBoard
 
 class ChessBot:
     def __init__(self):
-        pass
+        self.log_file = "None"
 
     def score_move(self, board: chess.Board, move: chess.Move) -> int:
         piece_values = {
@@ -129,12 +129,14 @@ class ChessBot:
 
 
 
-    def start_game_log(self, filename="../logs/minimax_vs_negamax.log"):
+    def start_game_log(self, filename="minimax_vs_negamax.log"):
+        self.log_file = filename
         # "w" mode overwrites the file or creates it if it doesn't exist
         with open(filename, "w") as log_file:
             log_file.write("Starting a new game...\n\n")
 
-    def log_move(self, minimax_move, eval_m, filename="../logs/minimax_vs_negamax.log"):
+    def log_move(self, minimax_move, eval_m):
         # "a" mode appends new lines without removing what's already there
-        with open(filename, "a") as log_file:
+
+        with open(self.log_file, "a") as log_file:
             log_file.write(f"Minimax move: {minimax_move}, eval: {eval_m}\n\n")
