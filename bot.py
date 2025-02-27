@@ -1,5 +1,7 @@
 import chess
 from chess_board import ChessBoard
+import chess_engine_cpp
+
 
 class ChessBot:
     def __init__(self):
@@ -116,9 +118,9 @@ class ChessBot:
         state = board.get_board_state()
 
 
-        eval_m, move_m = self.minimax(state, depth=5, alpha=-float('inf'), beta=float('inf'), maximizing_player=board.get_board_state().turn)
+        # eval_m, move_m = self.minimax(state, depth=5, alpha=-float('inf'), beta=float('inf'), maximizing_player=board.get_board_state().turn)
 
-
+        eval_m, move_m = chess_engine_cpp.find_best_move(state, depth=5)
 
         # Each time you pick a move for logging:
         self.log_move(move_m, eval_m)

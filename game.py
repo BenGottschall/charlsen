@@ -126,6 +126,6 @@ class ChessGame:
 
 
 if __name__ == "__main__":
-    fen = "6k1/8/q3K3/8/4B3/8/8/2q5 w - - 0 1"
-    game = ChessGame()
+    fen = "8/8/3r4/8/4k3/3r4/8/2K5 w - - 0 1"
+    game = ChessGame(fen)
     game.play_game()
