@@ -1,8 +1,8 @@
 import chess
 
 class ChessBoard:
-    def __init__(self):
-        self.board = chess.Board()
+    def __init__(self, fen=None):
+        self.board = chess.Board(fen=fen) if fen else chess.Board()
     
     def get_legal_moves(self):
         """Returns a list of legal moves in the current position."""
@@ -34,3 +34,7 @@ class ChessBoard:
         if self.is_game_over():
             return self.board.outcome()
         return None
+
+    def last_move(self):
+        """Returns the last move."""
+        return self.board.peek()

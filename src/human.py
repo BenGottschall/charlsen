@@ -3,10 +3,12 @@ import pygame
 import config
 
 class HumanPlayer:
-    def __init__(self, color, game):
+    def __init__(self, color, game, board_renderer):
         self.color = color
         self.game = game  # Store reference to game for redrawing
         self.selected_square = None
+        self.dragging = False
+        self.board_renderer = board_renderer
 
     def get_square_from_coords(self, x, y, flipped=False):
         """
@@ -36,10 +38,6 @@ class HumanPlayer:
 
     def get_promotion_choice(self):
         """Get the promotion piece choice from the player through clickable buttons with piece icons."""
-        import chess.svg
-        import cairosvg
-        import io
-        from PIL import Image
         
         pygame.font.init()
         font = pygame.font.Font(None, 36)
@@ -47,10 +45,10 @@ class HumanPlayer:
         
         # Define piece options
         pieces = [
-            (chess.QUEEN, "Queen"),
-            (chess.ROOK, "Rook"),
-            (chess.BISHOP, "Bishop"),
-            (chess.KNIGHT, "Knight")
+            (chess.QUEEN, "q"),
+            (chess.ROOK, "r"),
+            (chess.BISHOP, "b"),
+            (chess.KNIGHT, "n")
         ]
         
         # Calculate button dimensions and positions
@@ -58,29 +56,19 @@ class HumanPlayer:
         button_height = 80
         button_margin = 10
         total_height = (button_height + button_margin) * len(pieces)
-        start_y = (config.BOARD_SIZE - total_height) // 2  # Center vertically in 600x600 window
+        start_y = (config.BOARD_SIZE - total_height) // 2  # Center vertically
         
         # Create semi-transparent overlay
         overlay = pygame.Surface((config.BOARD_SIZE, config.BOARD_SIZE))
         overlay.fill((0, 0, 0))
-        overlay.set_alpha(128)
+        overlay.set_alpha(180)
         screen.blit(overlay, (0, 0))
-        
-        # Function to convert SVG to Pygame surface
-        def svg_to_pygame_surface(svg_string, size):
-            png_data = cairosvg.svg2png(bytestring=svg_string.encode('utf-8'))
-            image = Image.open(io.BytesIO(png_data))
-            image = image.resize((size, size))
-            mode = image.mode
-            size = image.size
-            data = image.tobytes()
-            return pygame.image.fromstring(data, size, mode)
         
         # Draw buttons and store their rects
         buttons = []
         current_y = start_y
         
-        for piece_type, piece_name in pieces:
+        for piece_type, piece_key in pieces:
             # Create button rectangle
             button_rect = pygame.Rect(
                 (config.BOARD_SIZE - button_width) // 2,  # Center horizontally
@@ -94,19 +82,19 @@ class HumanPlayer:
             pygame.draw.rect(screen, (100, 100, 100), button_rect, 2)  # Border
             
             # Generate piece SVG
-            piece_svg = chess.svg.piece(chess.Piece(piece_type, self.color), size=button_height-20)
-            piece_surface = svg_to_pygame_surface(piece_svg, button_height-20)
+            piece_img = self.board_renderer.pieces[f"{'w' if self.color else 'b'}{piece_key}"]
+            piece_img = pygame.transform.scale(piece_img, (button_height - 20, button_height - 20))
             
             # Calculate positions for piece icon and text
-            piece_x = button_rect.left + 20
-            piece_y = button_rect.top + 10
+            piece_x = button_rect.left + 15
+            piece_y = button_rect.centery - piece_img.get_height() // 2
             text_x = piece_x + button_height  # Position text after the piece icon
             
             # Draw piece icon
-            screen.blit(piece_surface, (piece_x, piece_y))
+            screen.blit(piece_img, (piece_x, piece_y))
             
             # Draw text
-            text = font.render(piece_name, True, (0, 0, 0))
+            text = font.render(piece_key.upper(), True, (0, 0, 0))
             text_rect = text.get_rect(midleft=(text_x, button_rect.centery))
             screen.blit(text, text_rect)
             
@@ -129,46 +117,55 @@ class HumanPlayer:
     def get_move(self, board):
         """Get move from human player through GUI interaction, added drag and drop"""
         # Removed pygame.event.clear() to avoid discarding important events
-        
+        dragged_piece = None
+        start_square = None
+
         while True:
-            event = pygame.event.wait()
-            
-            if event.type == pygame.QUIT:
-                return None
-                
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos
-                square = self.get_square_from_coords(x, y, self.color == chess.BLACK)
-                
-                if self.selected_square is None:
-                    # First click - select piece
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return None
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = event.pos
+                    square = self.get_square_from_coords(x, y, self.color == chess.BLACK)
                     piece = board.get_board_state().piece_at(square)
+
                     if piece and piece.color == self.color:
-                        self.selected_square = square
-                        # Immediately redraw board with highlighted square
-                        self.game.display_board(last_move=None, selected_square=self.selected_square)
-                else:
-                    # Second click - try to make move
-                    from_square = self.selected_square
-                    to_square = square
-                    
-                    # Check if this is a promotion move
-                    if self.is_promotion_move(board, from_square, to_square):
-                        promotion_piece = self.get_promotion_choice()
-                        if promotion_piece is None:
+                        self.dragging = True
+                        start_square = square
+                        self.selected_square = square  # Highlight selection
+
+
+                elif event.type == pygame.MOUSEBUTTONUP:
+
+                    self.dragging = False
+
+                    x, y = event.pos
+                    end_square = self.get_square_from_coords(x, y, self.color == chess.BLACK)
+
+                    if end_square != start_square:
+                        move = chess.Move(start_square, end_square)
+
+                        # Check if this is a promotion move
+                        if self.selected_square is not None:
+                            if self.is_promotion_move(board, start_square, end_square):
+                                promotion_piece = self.get_promotion_choice()
+                                if promotion_piece is None:
+                                    self.selected_square = None
+                                    continue
+                                move = chess.Move(start_square, end_square, promotion=promotion_piece)
+                            else:
+                                move = chess.Move(start_square, end_square)
+
+                        if move in board.get_legal_moves():
                             self.selected_square = None
-                            continue
-                        move = chess.Move(from_square, to_square, promotion=promotion_piece)
-                    else:
-                        move = chess.Move(from_square, to_square)
-                    
-                    # Check if move is legal
-                    if move in board.get_legal_moves():
+                            return move  # Execute move
+
+                        # If move is invalid, reset
                         self.selected_square = None
-                        return move
-                    
-                    # If illegal move, clear selection, updated to remove the x over the piece
-                    self.selected_square = None
-                    self.game.display_board(last_move=None, selected_square=self.selected_square)
-        
-        return None
+
+
+
+
+                self.game.display_board(mouse_pos=pygame.mouse.get_pos(), dragging=self.dragging,
+                                        selected_square=self.selected_square)
