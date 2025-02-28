@@ -1,13 +1,15 @@
 import chess
 from .chess_board import ChessBoard
+import time
 
 class ChessBot:
     def __init__(self):
         self.log_file = "None"
+        self.transposition_table = {}
 
     def score_move(self, board: chess.Board, move: chess.Move) -> int:
         piece_values = {
-            1: 100, 2: 320, 3: 330,
+            1: 100, 2: 300, 3: 300,
             4: 500, 5: 900, 6: 20000
         }
         score = 0;
@@ -57,6 +59,13 @@ class ChessBot:
 
         return score
 
+    def get_transposition_key(self, board: chess.Board, depth: int, maximizing_player: bool):
+        """
+        Create a unique key for the transposition table
+        """
+        # Use board FEN for position, depth, and player to create a unique key
+        return (board.fen(), depth, maximizing_player)
+
     def minimax(self, board: chess.Board, depth, alpha, beta, maximizing_player, ply=0) -> (int, chess.Move):
         """
         Minimax implementation.
@@ -65,6 +74,11 @@ class ChessBot:
 
         if depth == 0 or board.is_game_over():
             return self.evaluate_position(board, ply), None
+
+        tt_key = self.get_transposition_key(board, depth, maximizing_player)
+
+        if tt_key in self.transposition_table:
+            return self.transposition_table[tt_key]
 
         best_move = None
 
@@ -89,6 +103,8 @@ class ChessBot:
                 if alpha >= beta:
                     break
 
+            # Store result in transposition table
+            self.transposition_table[tt_key] = (best_eval, best_move)
             return best_eval, best_move
         else:
             best_eval = float('inf')
@@ -106,7 +122,8 @@ class ChessBot:
 
                 if beta <= alpha:
                     break
-
+            # Store result in transposition table
+            self.transposition_table[tt_key] = (best_eval, best_move)
             return best_eval, best_move
 
     def get_move(self, board: ChessBoard) -> chess.Move:
@@ -115,16 +132,16 @@ class ChessBot:
         """
         state = board.get_board_state()
 
-
+        start_time = time.time()
         eval_m, move_m = self.minimax(state, depth=5, alpha=-float('inf'), beta=float('inf'), maximizing_player=board.get_board_state().turn)
-
+        time_taken = time.time() - start_time
 
 
         # Each time you pick a move for logging:
         self.log_move(move_m, eval_m)
 
         print(f"Player: {state.turn}")
-        print(f"Best move: {move_m}, Evaluation: {eval_m}")
+        print(f"Best move: {move_m}, Evaluation: {eval_m}, found in {time_taken:.4f} seconds.")
         return move_m
 
 
