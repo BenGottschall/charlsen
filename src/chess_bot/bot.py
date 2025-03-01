@@ -1,5 +1,6 @@
 import chess
 from .chess_board import ChessBoard
+from .piece_table import PieceTable
 import time
 
 class ChessBot:
