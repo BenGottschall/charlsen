@@ -1,14 +1,21 @@
 import chess
 from .chess_board import ChessBoard
-from .piece_table import PieceTable
+from .evaluation import Evaluation
 import time
 
 class ChessBot:
     def __init__(self):
         self.log_file = "None"
         self.transposition_table = {}
+        self.evaluation = Evaluation()
 
     def score_move(self, board: chess.Board, move: chess.Move) -> int:
+        """
+        TODO: Probably move this to some sort of ordering moves file/class
+        :param board: chess.Board object holding game state
+        :param move: chess.Move object holding move to be scored
+        :return: score of the move
+        """
         piece_values = {
             1: 100, 2: 300, 3: 300,
             4: 500, 5: 900, 6: 20000
@@ -34,37 +41,13 @@ class ChessBot:
 
         return score
 
-    def evaluate_position(self, board: chess.Board, depth_searched: int) -> int:
-        """
-        Evaluates the current position of the board.
-        Positive values favor white, negative values favor black.
-        :param board: chess.Board object (not ChessBoard)
-        :return: score representing the current position
-        """
-
-        if board.is_game_over():
-            if board.is_checkmate():
-
-                return (-10000+depth_searched) if board.turn else (10000-depth_searched)
-            return 0 # Draw
-
-        score = 0
-        piece_values = {
-            1 : 100, 2 : 300, 3 : 300,
-            4 : 500, 5 : 900, 6 : 20000
-        }
-
-        for piece in piece_values:
-            score += len(board.pieces(piece, True)) * piece_values[piece]
-            score -= len(board.pieces(piece, False)) * piece_values[piece]
-
-        return score
-
     def get_transposition_key(self, board: chess.Board, depth: int, maximizing_player: bool):
         """
         Create a unique key for the transposition table
+        Use board FEN for position, depth, and player to create a unique key
+        TODO: Move this to a class, I don't think it does much at the moment
         """
-        # Use board FEN for position, depth, and player to create a unique key
+
         return (board.fen(), depth, maximizing_player)
 
     def minimax(self, board: chess.Board, depth, alpha, beta, maximizing_player, ply=0) -> (int, chess.Move):
@@ -74,7 +57,7 @@ class ChessBot:
         """
 
         if depth == 0 or board.is_game_over():
-            return self.evaluate_position(board, ply), None
+            return self.evaluation.evaluate_position(board, ply, maximizing_player), None
 
         tt_key = self.get_transposition_key(board, depth, maximizing_player)
 

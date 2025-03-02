@@ -7,26 +7,27 @@ class PieceTable:
     BISHOPS = 3
     ROOKS = 4
     QUEENS = 5
-    KING_START = 6
+    KING_EARLY = 6
     KING_END = 7
 
     def __init__(self):
         self.tables = {
-            'white': {
+            False: {
                 self.PAWNS_MID: self._pawns_mid(),
                 self.PAWNS_END: self._pawns_end(),
                 self.KNIGHTS: self._knights(),
                 self.BISHOPS: self._bishops(),
                 self.ROOKS: self._rooks(),
                 self.QUEENS: self._queens(),
-                self.KING_START: self._king_start(),
+                self.KING_EARLY: self._king_start(),
                 self.KING_END: self._king_end(),
             }
         }
-        self.tables['black'] = self._invert_tables(self.tables['white'])
+        self.tables[True] = self._invert_tables(self.tables[False])
+        # False = white, True = black
 
-    def get_table(self, piece, color):
-        return self.tables[color][piece]
+    def read(self, color: bool, table, square):
+        return self.tables[color][table][square]
 
     @staticmethod
     def _invert_tables(white_tables):
