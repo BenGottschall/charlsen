@@ -1,3 +1,3 @@
 # charlsen
 
-A chess ai bot written in python
+A work in progress chess bot written in python using the python chess library. Currently exploring optimizations in C++ and opening book implementation.
