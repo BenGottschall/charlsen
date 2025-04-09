@@ -1,6 +1,7 @@
 import chess
 from .chess_board import ChessBoard
 from .evaluation import Evaluation
+from .opening_book import OpeningBook
 import time
 
 class ChessBot:
@@ -8,6 +9,7 @@ class ChessBot:
         self.log_file = "None"
         self.transposition_table = {}
         self.evaluation = Evaluation()
+        self.opening_book = OpeningBook("../assets/Book.txt")
 
     def score_move(self, board: chess.Board, move: chess.Move) -> int:
         """
@@ -115,6 +117,13 @@ class ChessBot:
         Main method to select the best move.
         """
         state = board.get_board_state()
+
+        book_move = self.opening_book.get_move(state.fen())
+
+        if book_move:
+            return chess.Move.from_uci(book_move)
+
+        print("no book move found")
 
         start_time = time.time()
         eval_m, move_m = self.minimax(state, depth=5, alpha=-float('inf'), beta=float('inf'), maximizing_player=board.get_board_state().turn)

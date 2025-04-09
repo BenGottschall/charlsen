@@ -64,6 +64,8 @@ class ChessGame:
         if dragging:
             self.board_renderer.draw_drag(self.screen, mouse_pos, selected_piece)
 
+
+
         pygame.display.flip()
 
     def play_move_sound(self, move):
@@ -76,6 +78,7 @@ class ChessGame:
 
     def play_game(self):
         """Main game loop"""
+
         last_move = None
         self.black_player.start_game_log(f"{LOGS_DIR}/minimax.log")
 

@@ -1,5 +1,6 @@
 import pygame
 import chess
+import math
 
 class BoardRenderer:
     def __init__(self, board, spritesheet, board_size=1200):
@@ -66,6 +67,60 @@ class BoardRenderer:
         overlay = pygame.Surface((self.square_size, self.square_size), pygame.SRCALPHA)
         overlay.fill(color)
         screen.blit(overlay, (col * self.square_size, row * self.square_size))
+
+    def draw_arrow(self, screen, arrow_surface, color, move):
+        if isinstance(move, str):
+            move = chess.Move.from_uci(move)
+
+        from_sq = move.from_square
+        to_sq = move.to_square
+
+        from_x, from_y = self.square_to_pixel(from_sq)
+        to_x, to_y = self.square_to_pixel(to_sq)
+
+        dx = to_x - from_x
+        dy = to_y - from_y
+        length = math.hypot(dx, dy)
+        if length == 0:
+            return
+
+        unit_dx = dx / length
+        unit_dy = dy / length
+
+        # Distance to pull back from the tip for the line
+        arrow_size = 40
+        arrow_offset = arrow_size * 0.6
+
+        # Start and end of the line (arrow tip is dead center of destination square)
+        start = (from_x + unit_dx * 10, from_y + unit_dy * 10)  # small offset from square center
+        end = (to_x - unit_dx * arrow_offset, to_y - unit_dy * arrow_offset)
+
+        # arrow_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+
+        pygame.draw.line(arrow_surface, color, start, end, width=20)
+
+        # Arrowhead centered in destination square
+        arrow_tip = (to_x, to_y)
+
+        angle = math.atan2(dy, dx)
+        left = (
+            arrow_tip[0] - arrow_size * math.cos(angle - math.pi / 5),
+            arrow_tip[1] - arrow_size * math.sin(angle - math.pi / 5)
+        )
+        right = (
+            arrow_tip[0] - arrow_size * math.cos(angle + math.pi / 5),
+            arrow_tip[1] - arrow_size * math.sin(angle + math.pi / 5)
+        )
+        pygame.draw.polygon(arrow_surface, color, [arrow_tip, left, right])
+        screen.blit(arrow_surface, (0, 0))
+
+    def square_to_pixel(self, square):
+        file = chess.square_file(square)
+        rank = chess.square_rank(square)
+        # Flip rank if board is displayed from White's perspective
+        rank = 7 - rank
+        return (file * self.square_size + self.square_size // 2,
+                rank * self.square_size + self.square_size // 2)
 
 
 
